@@ -1,21 +1,24 @@
-const { validateToken } = require("../services/authentication");
+const JWT = require("jsonwebtoken");
 
-function checkForAuthenticationCookie(cookieName) {
-  return (req, res, next) => {
-    const tokenCookieValue = req.cookies[cookieName];
-    if (!tokenCookieValue) {
-      return next();
-    }
+const secret = "$uperMan@123";
 
-    try {
-      const userPayload = validateToken(tokenCookieValue);
-      req.user = userPayload;
-    } catch (error) {}
-
-    return next();
+function createTokenForUser(user) {
+  const payload = {
+    _id: user._id,
+    email: user.email,
+    profileImageURL: user.profileImageURL,
+    role: user.role,
   };
+  const token = JWT.sign(payload, secret);
+  return token;
+}
+
+function validateToken(token) {
+  const payload = JWT.verify(token, secret);
+  return payload;
 }
 
 module.exports = {
-  checkForAuthenticationCookie,
+  createTokenForUser,
+  validateToken,
 };
